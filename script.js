@@ -17,13 +17,8 @@
             } else if (currentDate == activeDate) {
                 issuances[issuances.length - 1]++;
             }
-
         }
 
-        console.log(currentDate);
-        console.log(dates);
-        console.log(issuances);
-        
         c3.generate({
             bindto: '#chart',
             data: {

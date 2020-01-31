@@ -3,43 +3,69 @@
     //     return ""
     // }
 
-    function buildChart() {
+    function buildChart(data) {
+        var currentDate;
+        var dates = ['x'];
+        var issuances = ['Licenses Issued'];
+
+        for (var i = 0; i < data.rows.length; i++) {
+            var activeDate = data.rows[i].issuedate.substring(0,10);
+            if (currentDate == undefined || currentDate == null || currentDate != activeDate) {
+                currentDate = data.rows[i].issuedate.substring(0,10);
+                dates.push(activeDate);
+                issuances[issuances.length] = 1;
+            } else if (currentDate == activeDate) {
+                issuances[issuances.length - 1]++;
+            }
+
+        }
+
+        console.log(currentDate);
+        console.log(dates);
+        console.log(issuances);
+        
         c3.generate({
             bindto: '#chart',
             data: {
+                x: 'x',
                 columns: [
-                    ['data1', 30, 200, 100, 400, 150, 250],
-                    ['data2', 50, 20, 10, 40, 15, 25]
+                    dates,
+                    issuances
                 ]
+            },
+            axis: {
+                x: {
+                    type: 'timeseries',
+                    tick: {
+                        format: '%Y-%m-%d'
+                    }
+                }
             }
         });
     }
 
-    buildChart();
-
     function loadChart(cols, restraints) {
-        var cols = '*';
-        var restraints = '';
-
-        if (cols != undefined && cols != null && cols.length > 0) {
-            cols = '';
-
-            for (var i = 0; i < cols.length; i++) {
-                cols += cols[i];
-            }
+        if (cols == undefined || cols == null) {
+            cols = '*';
+        } else {
+                for (var i = 0; i < cols.length; i++) {
+                    cols += cols[i];
+                }
         }
 
-        if (restraints != undefined && restraints != null && restraints.length > 0) {
+        if (restraints == undefined || restraints == null) {
+            restraints = '';
+        } else {
             restraints = 'WHERE ';
         }
 
-        var query = `https://phl.carto.com/api/v2/sql?q=SELECT%20${cols}%20FROM%20li_com_act_licenses%20${restraints}%20ORDER%20BY%20issuedate%20DESC%20LIMIT%20100`;
+        var query = `https://phl.carto.com/api/v2/sql?q=SELECT%20${cols}%20FROM%20li_com_act_licenses%20${restraints}%20ORDER%20BY%20issuedate%20DESC%20LIMIT%20500`;
         fetch(query, {
             method: 'GET',
 
         }).then(function(res){
             return res.json().then(function(res) {
-                console.log(res);
+                buildChart(res);
             });
         }).catch(function(err) {
             console.error(err);
